@@ -15,10 +15,14 @@ import com.facebook.react.bridge.WritableMap;
 import com.linecorp.linesdk.LineAccessToken;
 import com.linecorp.linesdk.LineApiResponse;
 import com.linecorp.linesdk.LineProfile;
+import com.linecorp.linesdk.Scope;
 import com.linecorp.linesdk.api.LineApiClient;
 import com.linecorp.linesdk.api.LineApiClientBuilder;
+import com.linecorp.linesdk.auth.LineAuthenticationParams;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
+
+import java.util.Arrays;
 
 public class LineLogin extends ReactContextBaseJavaModule {
     private static final String MODULE_NAME = "LineLoginManager";
@@ -73,7 +77,13 @@ public class LineLogin extends ReactContextBaseJavaModule {
             currentPromise = promise;
             Context context = getCurrentActivity().getApplicationContext();
             String channelId = context.getString(R.string.line_channel_id);
-            Intent intent = LineLoginApi.getLoginIntent(context, channelId);
+            Intent intent = LineLoginApi.getLoginIntent(
+                context,
+                channelId,
+                new LineAuthenticationParams.Builder()
+                        .scopes(Arrays.asList(Scope.PROFILE))
+                        .build()
+            );
             getCurrentActivity().startActivityForResult(intent, REQUEST_CODE);
         } catch (Exception e) {
             promise.reject(ERROR, e.toString());
@@ -132,7 +142,7 @@ public class LineLogin extends ReactContextBaseJavaModule {
 
     private WritableMap parseAccessToken(LineAccessToken accessToken) {
         WritableMap result = Arguments.createMap();
-        result.putString("accessToken", accessToken.getAccessToken());
+        result.putString("accessToken", accessToken.getTokenString());
         result.putString("expirationDate", Long.toString(accessToken.getExpiresInMillis()));
         return result;
     }
