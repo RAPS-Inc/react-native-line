@@ -128,7 +128,6 @@ RCT_EXPORT_METHOD(getUserProfile:(RCTPromiseResolveBlock)resolve
         loginRejecter(nil, nil, error);
     } else
     {
-        NSLog(@"==================== credential %@", credential.IDToken.email);
         NSMutableDictionary *result = [NSMutableDictionary new];
         NSDictionary *parsedAccessToken = [self parseAccessToken:[credential accessToken]];
         NSDictionary *parsedProfile = [self parseProfile:profile];
