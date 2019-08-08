@@ -5,7 +5,7 @@ static NSString *errorDomain = @"LineLogin";
 @implementation LineLoginManager
 {
     LineSDKAPI *apiClient;
-    
+
     RCTPromiseResolveBlock loginResolver;
     RCTPromiseRejectBlock loginRejecter;
 }
@@ -24,7 +24,7 @@ RCT_EXPORT_METHOD(login:(RCTPromiseResolveBlock)resolve
 {
     loginResolver = resolve;
     loginRejecter = reject;
-    
+
     [self loginWithPermissions:nil];
 }
 
@@ -35,7 +35,7 @@ RCT_EXPORT_METHOD(loginWithPermissions:(NSArray *)permissions
 {
     loginResolver = resolve;
     loginRejecter = reject;
-    
+
     [self loginWithPermissions:permissions];
 }
 
@@ -96,7 +96,7 @@ RCT_EXPORT_METHOD(getUserProfile:(RCTPromiseResolveBlock)resolve
 - (void)loginWithPermissions:(NSArray *)permissions
 {
     LineSDKLogin *shared = [LineSDKLogin sharedInstance];
-    
+
     if ([shared canLoginWithLineApp])
     {
         if (permissions && [permissions count] > 0) {
@@ -128,14 +128,13 @@ RCT_EXPORT_METHOD(getUserProfile:(RCTPromiseResolveBlock)resolve
         loginRejecter(nil, nil, error);
     } else
     {
+        NSLog(@"==================== credential %@", credential.IDToken.email);
         NSMutableDictionary *result = [NSMutableDictionary new];
-        
         NSDictionary *parsedAccessToken = [self parseAccessToken:[credential accessToken]];
         NSDictionary *parsedProfile = [self parseProfile:profile];
-        
         [result setValue:parsedAccessToken forKey:@"accessToken"];
         [result setValue:parsedProfile forKey:@"profile"];
-        
+        [result setValue:credential.IDToken.email forKey:@"email"];
         loginResolver(result);
     }
 }
@@ -145,7 +144,7 @@ RCT_EXPORT_METHOD(getUserProfile:(RCTPromiseResolveBlock)resolve
 - (NSDictionary *)parseProfile:(LineSDKProfile *)profile
 {
     NSMutableDictionary *result = [NSMutableDictionary new];
-    
+
     [result setValue:[profile userID] forKey:@"userID"];
     [result setValue:[profile displayName] forKey:@"displayName"];
     [result setValue:[profile statusMessage] forKey:@"statusMessage"];
@@ -153,19 +152,19 @@ RCT_EXPORT_METHOD(getUserProfile:(RCTPromiseResolveBlock)resolve
     {
         [result setValue:[[profile pictureURL] absoluteString] forKey:@"pictureURL"];
     }
-    
+
     return result;
 }
 
 - (NSDictionary *)parseAccessToken:(LineSDKAccessToken *)accessToken
 {
     NSMutableDictionary *result = [NSMutableDictionary new];
-    
+
     [result setValue:[accessToken accessToken] forKey:@"accessToken"];
     [result setValue:[accessToken estimatedExpiredDate] forKey:@"expirationDate"];
-    
+
     return result;
 }
 
 @end
-  
+
