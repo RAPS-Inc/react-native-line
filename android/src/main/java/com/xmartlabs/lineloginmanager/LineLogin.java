@@ -21,6 +21,11 @@ import com.linecorp.linesdk.api.LineApiClientBuilder;
 import com.linecorp.linesdk.auth.LineAuthenticationParams;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
+import com.facebook.react.bridge.ReadableArray;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import java.util.Arrays;
 
@@ -73,26 +78,39 @@ public class LineLogin extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void login(final Promise promise) {
+        this.loginWithPermissions(null, promise);
+    }
+
+    @ReactMethod
+    public void loginWithPermissions(ReadableArray permissions, final Promise promise) {
         try {
             currentPromise = promise;
             Context context = getCurrentActivity().getApplicationContext();
             String channelId = context.getString(R.string.line_channel_id);
+
+            List<Scope> scopes;
+
+            if ((permissions != null) && (permissions.size() > 0)) {
+                List<String> scopeStrings = new ArrayList<>(permissions.size());
+                for (int i = 0; i < permissions.size(); i++) {
+                    String scope = permissions.getString(i);
+                    scopeStrings.add(scope);
+                }
+                scopes = Scope.convertToScopeList(scopeStrings);
+            } else {
+                scopes = Scope.convertToScopeList(new ArrayList());
+            }
+
             Intent intent = LineLoginApi.getLoginIntent(
-                context,
-                channelId,
-                new LineAuthenticationParams.Builder()
-                        .scopes(Arrays.asList(Scope.PROFILE))
-                        .build()
-            );
+                    context,
+                    channelId,
+                    new LineAuthenticationParams.Builder()
+                            .scopes(scopes)
+                            .build());
             getCurrentActivity().startActivityForResult(intent, REQUEST_CODE);
         } catch (Exception e) {
             promise.reject(ERROR, e.toString());
         }
-    }
-
-    @ReactMethod
-    public void loginWithPermissions(final Promise promise) {
-        promise.reject(ERROR, "Login with permissions is not supported on Android.");
     }
 
     @ReactMethod
@@ -126,6 +144,9 @@ public class LineLogin extends ReactContextBaseJavaModule {
         WritableMap result = Arguments.createMap();
         result.putMap("profile", parseProfile(loginResult.getLineProfile()));
         result.putMap("accessToken", parseAccessToken(loginResult.getLineCredential().getAccessToken()));
+        if (loginResult.getLineIdToken() != null) {
+            result.putString("email", (loginResult.getLineIdToken().getEmail()));
+        }
         return result;
     }
 
