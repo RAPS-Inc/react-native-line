@@ -144,6 +144,7 @@ public class LineLogin extends ReactContextBaseJavaModule {
         WritableMap result = Arguments.createMap();
         result.putMap("profile", parseProfile(loginResult.getLineProfile()));
         result.putMap("accessToken", parseAccessToken(loginResult.getLineCredential().getAccessToken()));
+        result.putMap("email", parseAccessToken(loginResult.getLineIdToken().getEmail()));
         if (loginResult.getLineIdToken() != null) {
             result.putString("email", (loginResult.getLineIdToken().getEmail()));
         }
