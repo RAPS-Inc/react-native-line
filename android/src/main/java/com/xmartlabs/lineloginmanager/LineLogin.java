@@ -19,6 +19,7 @@ import com.linecorp.linesdk.Scope;
 import com.linecorp.linesdk.api.LineApiClient;
 import com.linecorp.linesdk.api.LineApiClientBuilder;
 import com.linecorp.linesdk.auth.LineAuthenticationParams;
+import com.linecorp.linesdk.auth.LineAuthenticationParams.BotPrompt;
 import com.linecorp.linesdk.auth.LineLoginApi;
 import com.linecorp.linesdk.auth.LineLoginResult;
 import com.facebook.react.bridge.ReadableArray;
@@ -104,6 +105,7 @@ public class LineLogin extends ReactContextBaseJavaModule {
                 channelId,
                 new LineAuthenticationParams.Builder()
                         .scopes(scopes)
+                        .botPrompt(BotPrompt.aggressive)
                         .build()
             );
             getCurrentActivity().startActivityForResult(intent, REQUEST_CODE);

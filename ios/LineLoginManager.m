@@ -97,6 +97,8 @@ RCT_EXPORT_METHOD(getUserProfile:(RCTPromiseResolveBlock)resolve
 {
     LineSDKLogin *shared = [LineSDKLogin sharedInstance];
 
+    [LineSDKLogin sharedInstance].botPrompt = LineSDKBotPromptAggressive;
+
     if ([shared canLoginWithLineApp])
     {
         if (permissions && [permissions count] > 0) {
